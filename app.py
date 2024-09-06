@@ -13,6 +13,8 @@ def is_valid_email(email):
 
 # function to create motifscope command
 def createMotifscopeCommand(random_number):
+    # create output directory
+    os.system('mkdir runs/run_%s' %(random_number))
     # define input reads
     input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
@@ -66,7 +68,6 @@ def index():
         if emailResponse == True:
             messageSubmission = 'Your job has been submitted with ID: %s. Check Download page shortly to get your results' %(random_number)
             # create directory with run information
-            os.system('mkdir runs/run_%s' %(random_number))
             if textarea_input != '':
                 # write this file as it is the input for motifscope
                 fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
