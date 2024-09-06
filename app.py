@@ -34,8 +34,8 @@ def check_runID(run_id):
         if os.path.exists('runs/run_%s' %(run_id)):
             messageError = False
             messageToUser = 'Valid Run ID. Download will start soon'
-            # compress folder
-            os.system('tar -cvf runs/run_%s.tar.gz runs/run_%s' %(run_id, run_id))
+            # compress folder and remove original folder
+            os.system('tar -cvf runs/run_%s.tar.gz runs/run_%s && rm -rf runs/run_%s' % (run_id, run_id, run_id))
         else:
             messageError = True
             messageToUser = 'Not valid Run ID. Try again.'
