@@ -103,6 +103,10 @@ def download_results(run_id):
     filepath = os.path.join("runs", filename)
     return send_file(filepath, as_attachment=True, download_name=filename)
 
+@app.route('/about/', methods=["GET"])
+def about():
+    return render_template("about.html")
+
 # Run the app
 if __name__ == '__main__':
     app.run(debug=True)
