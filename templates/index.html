@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <body id="annotation_sec">
+        <!-- DNA image at the top -->
+        <div class="centered-container">
+            <img class="centered-image" src="{{ url_for('static', filename='images/dna.png') }}" alt="Image">
+        </div>
+
+        <!-- Title at the top -->
+        <h2>{% block title %} MotifScope {% endblock %}</h2>
+        <h3>Annotate your tandem repeats in 3 simple steps</h3>
+        
+        <!-- Subtitle below the title -->
+        <div style="display:flex;">
+            <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 32%;">
+                <h2>1</h2>
+                <h3>Paste your sequences in the text area (FASTA format), or upload your FASTA file.</h3>
+            </div>
+            <div style="padding: 10px; background-color: #E0E5F0; margin: 20px; width: 32%;">
+                <h2>2</h2>
+                <h3>Change MotifScope parameters or leave them as default</h3>
+            </div>
+            <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; width: 32%;">
+                <h2>3</h2>
+                <h3>Add your email so that we can reach you when your results are ready. Then submit!</h3>
+            </div>
+        </div>
+        
+        <form id="annotationForm" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <div style="display:flex;">
+                <!-- Textarea for the input SNPs -->
+                <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 32%;">
+                    <h4>Paste your sequences</h4>
+                    <textarea name="SNPlist" placeholder="Paste sequences of interest in FASTA format. Please paste up to 100 sequences, otherwise the program will not run.&#10;&#13;&#10;&#13;" rows="5" cols="50" style="font-size: 16px;">{{ request.form.get('SNPlist', '') }}</textarea>
+                    <h4>Or, upload your FASTA file</h4>
+                    <input type="file" name="fasta_file" accept=".fasta,.fa,.FA,.FASTA,.txt" style="margin-top: 10px;">
+                </div> 
+        
+                <!-- Next column: parametes -->
+                <div style="padding: 10px; background-color: #E0E5F0; margin: 20px; width: 32%;">
+                    <h4>Motifscope parameters</h4>
+                </div>
+
+                <!-- Next column: email and submit button -- no login option -->
+                <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; width: 32%;">
+                    <h4>Email</h4>
+                    <small>Please enter your email address below. The results will be sent to you:</small>
+                    <textarea name="email" style="width: 100%; height: 30px; font-size: 16px;" placeholder="Enter your email here"></textarea>
+                    <br>
+                    <br>
+                    <!-- Button to run analysis -->
+                    <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; text-align: center">
+                        <input type="submit" value="Submit your job here!" onclick="showMessage()" style="font-size: 64px; padding: 20px 40px; width: 75%; height: auto;">
+                        <p style="color: {{ 'red' if messageSubmission == 'Email is not correct. Please check!' else 'green' }}">{{ messageSubmission }}</p>
+                    </div>
+                </div>
+
+                <!-- Javascript to check form was properly completed -->
+                <script>
+                    function validateForm() {
+                        var snpList = document.getElementsByName("SNPlist")[0].value;
+                        var fileInput = document.getElementsByName("fasta_file")[0].files;
+                        // Check if either the textarea is not empty or a file is selected
+                        if (snpList.trim() === "" && fileInput.length === 0) {
+                            alert("Please enter the sequences to annotate or upload a FASTA file.");
+                            return false;  // Prevent form submission
+                        }
+                        return true;  // Allow form submission
+                    }
+                    </script>
+            </div>
+        </form>
+
+        <!-- Footnote images -->
+        <div class="image-container-foot">
+            <img src="{{ url_for('static', filename='images/amstUMC.jpg') }}" alt="ams">
+            <img src="{{ url_for('static', filename='images/github.png') }}" alt="gith">
+        </div>
+    </body>
+{% endblock %}
