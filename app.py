@@ -13,8 +13,6 @@ def is_valid_email(email):
 
 # function to create motifscope command
 def createMotifscopeCommand(random_number):
-    # create output directory
-    os.system('mkdir runs/run_%s' %(random_number))
     # define input reads
     input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
@@ -58,6 +56,8 @@ def index():
     messageSubmission = ''
     # generte random number
     random_number = random.randint(0, 1000000)
+    # create output directory
+    os.system('mkdir runs/run_%s' %(random_number))
     if request.method == "POST":
         # Read inputs
         textarea_input = request.form.get('SNPlist', '')
