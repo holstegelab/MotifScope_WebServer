@@ -50,7 +50,8 @@ def index():
     email = request.form.get('email', '')
     email = email.replace(' ', '').rstrip()
     # check if email is valid
-    emailResponse = is_valid_email(email)
+    #emailResponse = is_valid_email(email)
+    emailResponse = True
     # modify the message linked to submission
     messageSubmission = ''
     # generte random number
@@ -63,7 +64,7 @@ def index():
         # ...
         # update message
         if emailResponse == True:
-            messageSubmission = 'Your job has been submitted! Check your email shortly.'
+            messageSubmission = 'Your job has been submitted with ID: %s. Check Download page shortly to get your results' %(random_number)
             # create directory with run information
             os.system('mkdir runs/run_%s' %(random_number))
             if textarea_input != '':
