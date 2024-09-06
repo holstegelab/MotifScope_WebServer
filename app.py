@@ -17,7 +17,9 @@ def createMotifscopeCommand(random_number):
     input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type reads -i %s -o %s > %s' %(input_reads, output_folder, log_file)
+    command = 'motifscope --sequence-type reads -i %s -o %s >> %s' %(input_reads, output_folder, log_file)
+    effective_command = 'echo %s > %s' %(command, log_file)
+    save_command_line =  subprocess.Popen(effective_command, shell=True)
     return command
 
 # Create a Flask app instance
