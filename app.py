@@ -15,7 +15,7 @@ def is_valid_email(email):
 def createMotifscopeCommand(random_number):
     # define input reads
     input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
-    output_folder = 'runs/run_%s' %(random_number)
+    output_folder = 'runs/run_%s/run_%s_output' %(random_number)
     command = 'motifscope --sequence-type reads -i %s -o %s' %(input_reads, output_folder)
     return command
 
