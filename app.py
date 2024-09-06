@@ -18,7 +18,7 @@ def createMotifscopeCommand(random_number):
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
     output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type reads -i %s -o %s >> %s; tar -cvf %s runs/run_%s; rm -rf runs/run_%s' %(input_reads, output_folder, log_file, output_compressed, random_number, random_number)
+    command = 'motifscope --sequence-type reads -i %s -o %s >> %s' %(input_reads, output_folder, log_file)
     effective_command = 'echo %s > %s' %(command, log_file)
     save_command_line =  subprocess.Popen(effective_command, shell=True)
     return command
