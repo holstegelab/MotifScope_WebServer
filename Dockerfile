@@ -16,11 +16,11 @@ RUN pip3 install -r requirements.txt
 COPY . .
 
 # Expose Redis port
-#EXPOSE 6379
+EXPOSE 8004
 
 # Set environment variables
 ENV FLASK_APP=App/app.py
 
 # Specify the command to run when the container starts
 #CMD service redis-server start && python3 -m flask run --host=82.165.237.220 -p 8003
-CMD python3 -m flask run --host=82.165.237.220
+CMD python3 -m flask run --host=82.165.237.220 -p 8004
