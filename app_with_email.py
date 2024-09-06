@@ -48,38 +48,45 @@ app = Flask(__name__)
 @app.route('/', methods=["GET", "POST"])
 @app.route('/index/', methods=["GET", "POST"])
 def index():
+    # email
+    email = request.form.get('email', '')
+    email = email.replace(' ', '').rstrip()
+    # check if email is valid
+    #emailResponse = is_valid_email(email)
+    emailResponse = True
     # modify the message linked to submission
     messageSubmission = ''
-    # read inputs
-    textarea_input = request.form.get('SNPlist', '')
-    uploaded_file = request.files.get('fasta_file')
-    # parse other inputs here
-    # ...
-    if textarea_input != '' and uploaded_file and uploaded_file.filename != '':
-        # if there was an input of some sort, create random number and output folder
-        # generate random number
-        random_number = random.randint(0, 1000000)
-        # create output directory
-        os.system('mkdir runs/run_%s' %(random_number))
-        # message to the user with the run id
-        messageSubmission = 'Your job has been submitted with ID: %s. Check Download page shortly to get your results' %(random_number)
-        # then check what input that was
-        if textarea_input != '':
-            # write this file as it is the input for motifscope
-            fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
-            fout.write(textarea_input)
-            fout.close()
-        elif uploaded_file and uploaded_file.filename != '':
-            input_fasta = uploaded_file.read().decode('utf-8')
-            fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
-            fout.write(input_fasta)
-            fout.close()    
+    # generte random number
+    random_number = random.randint(0, 1000000)
+    # create output directory
+    os.system('mkdir runs/run_%s' %(random_number))
+    if request.method == "POST":
+        # Read inputs
+        textarea_input = request.form.get('SNPlist', '')
+        uploaded_file = request.files.get('fasta_file')
+        # parse other inputs here
+        # ...
+        # update message
+        if emailResponse == True:
+            messageSubmission = 'Your job has been submitted with ID: %s. Check Download page shortly to get your results' %(random_number)
+            # create directory with run information
+            if textarea_input != '':
+                # write this file as it is the input for motifscope
+                fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
+                fout.write(textarea_input)
+                fout.close()
+            elif uploaded_file and uploaded_file.filename != '':
+                input_fasta = uploaded_file.read().decode('utf-8')
+                fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
+                fout.write(input_fasta)
+                fout.close()
             # run the script here
+            #command = 'sh run_docker_webserver.sh runs/run_%s/run_%s_input.txt runs/run_%s' %(random_number, random_number, random_number)
             command = createMotifscopeCommand(random_number)
             command_run = subprocess.Popen(command, shell=True)
-    else:
-        messageSubmission = 'Input is missing!'
-    return render_template('index.html', messageSubmission=messageSubmission) 
+        else:
+            messageSubmission = 'Email is not correct. Please check!'
+    return render_template('index.html', validEmail=emailResponse, messageSubmission=messageSubmission) 
 
 # Download tab
 @app.route('/download/', methods=["GET", "POST"])
