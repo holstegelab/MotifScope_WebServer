@@ -1,26 +1,66 @@
-# syntax=docker/dockerfile:1
+# Use the official Python image from the Docker Hub
+FROM python:3.10-slim
 
-FROM python:3.8-slim-buster
+# Set the working directory
+WORKDIR /app
 
-WORKDIR /
+# Copy the requirements file into the container
+COPY requirements.txt .
 
-# Install required system packages (including Tabix)
-RUN apt-get update \
-    && apt-get install
+# Install the dependencies
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends \
+        curl \
+        gcc \
+        build-essential \
+        libffi-dev \
+        libssl-dev \
+        git \
+        zlib1g-dev \
+        libpng-dev \
+        && \
+        pip install --no-cache-dir -r requirements.txt && \
+        rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+# Install TRF
+# !! You can remove these lines
+RUN git clone https://github.com/holstegelab/pylibsais.git /opt/pylibsais
+# Set up build directory
+WORKDIR /opt/pylibsais
+# Configure and build TRF
+RUN ./setup.py build
+# Make it system-wide available
+RUN ./setup.py install
+
+# Clone the TREAT GitHub repository
+# !! You can remove this line, and change it to MotifScope
+RUN git clone https://github.com/holstegelab/MotifScope.git /app/MotifScope
+
+WORKDIR /app/MotifScope
+
+RUN python install/conda/setup.py install
+
+# Change working directory to the cloned repository
+# Modify this line -- changing treat to motifscope should work
+WORKDIR /app/MotifScope
+
+# Clean image by removing unnecessary programs
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        && apt-get remove -y build-essential \
+        && apt-get autoremove -y \
+        && rm -rf /var/lib/apt/lists/*
 
 # Copy the rest of your application files
-COPY . .
-
-# Expose Redis port
-EXPOSE 8004
 
 # Set environment variables
 ENV FLASK_APP=App/app.py
+COPY . .
+EXPOSE 8004
 
-# Specify the command to run when the container starts
-#CMD service redis-server start && python3 -m flask run --host=82.165.237.220 -p 8003
+# Define the default command to run your application
+# Modify the mofflowind depending on how you run motifscope
+#ENTRYPOINT ["python", "motifscope"]
 CMD python3 -m flask run --host=82.165.237.220 -p 8004
