@@ -72,9 +72,9 @@ def index():
             fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
             fout.write(input_fasta)
             fout.close()    
-            # run the script here
-            command = createMotifscopeCommand(random_number)
-            command_run = subprocess.Popen(command, shell=True)
+        # run the script here
+        command = createMotifscopeCommand(random_number)
+        command_run = subprocess.Popen(command, shell=True)
     else:
         messageSubmission = ''
     return render_template('index.html', messageSubmission=messageSubmission) 
