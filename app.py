@@ -16,11 +16,28 @@ def createMotifscopeCommand(random_number):
     # define input reads
     input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
+    output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type reads -i %s -o %s >> %s' %(input_reads, output_folder, log_file)
+    command = 'motifscope --sequence-type reads -i %s -o %s >> %s; tar -cvf %s runs/run_%s' %(input_reads, output_folder, log_file, output_compressed, random_number)
     effective_command = 'echo %s > %s' %(command, log_file)
     save_command_line =  subprocess.Popen(effective_command, shell=True)
     return command
+
+# function to check whether the run_id is correct
+def check_runID(run_id):
+    run_id = run_id.replace(' ', '')
+    if run_id == '':
+        messageError = True
+        messageToUser = 'Please insert a valid Run ID'
+    else:
+        # check whether the file exists
+        if os.path.exists('/runs/run_%s.tar.gz' %(run_id)):
+            messageError = False
+            messageToUser = 'Valid Run ID. Download will start soon'
+        else:
+            messageError = True
+            messageToUser = 'Not valid Run ID. Try again.'
+    return messageError, messageToUser
 
 # Create a Flask app instance
 app = Flask(__name__)
@@ -62,11 +79,29 @@ def index():
             # run the script here
             #command = 'sh run_docker_webserver.sh runs/run_%s/run_%s_input.txt runs/run_%s' %(random_number, random_number, random_number)
             command = createMotifscopeCommand(random_number)
-            print(command)
             command_run = subprocess.Popen(command, shell=True)
         else:
             messageSubmission = 'Email is not correct. Please check!'
     return render_template('index.html', validEmail=emailResponse, messageSubmission=messageSubmission) 
+
+# Download tab
+@app.route('/download/', methods=["GET", "POST"])
+def download():
+    run_id = None
+    messageError = None
+    messageToUser = None
+    if request.method == 'POST':
+        run_id = request.form["run_id"]
+        messageError, messageToUser = check_runID(run_id)
+    return render_template('download.html', run_id=run_id, messageError=messageError, messageToUser=messageToUser)
+
+# Actual download button for the annotation results
+@app.route('/downloadResults/<run_id>', methods=["GET"])
+def download_results(run_id):
+    # check here the run ID
+    filename = f"run_{run_id}.tar.gz"
+    filepath = os.path.join("/runs", filename)
+    return send_file(filepath, as_attachment=True, download_name=filename)
 
 # Run the app
 if __name__ == '__main__':
