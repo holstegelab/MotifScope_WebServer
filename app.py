@@ -18,7 +18,7 @@ def createMotifscopeCommand(random_number):
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
     output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type reads -i %s -o %s >> %s; tar -cvf %s runs/run_%s' %(input_reads, output_folder, log_file, output_compressed, random_number)
+    command = 'motifscope --sequence-type reads -i %s -o %s >> %s; tar -cvf %s runs/run_%s; rm -rf runs/run_%s' %(input_reads, output_folder, log_file, output_compressed, random_number, random_number)
     effective_command = 'echo %s > %s' %(command, log_file)
     save_command_line =  subprocess.Popen(effective_command, shell=True)
     return command
@@ -31,7 +31,7 @@ def check_runID(run_id):
         messageToUser = 'Please insert a valid Run ID'
     else:
         # check whether the file exists
-        if os.path.exists('/runs/run_%s.tar.gz' %(run_id)):
+        if os.path.exists('runs/run_%s.tar.gz' %(run_id)):
             messageError = False
             messageToUser = 'Valid Run ID. Download will start soon'
         else:
