@@ -11,6 +11,14 @@ def is_valid_email(email):
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
 
+# function to create motifscope command
+def createMotifscopeCommand(random_number):
+    # define input reads
+    input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
+    output_folder = 'runs/run_%s' %(random_number)
+    command = 'motifscope --sequence-type assembly -i %s -o %s' %(input_reads, output_folder)
+    return command
+
 # Create a Flask app instance
 app = Flask(__name__)
 
@@ -49,7 +57,8 @@ def index():
                 fout.write(input_fasta)
                 fout.close()
             # run the script here
-            command = 'sh run_docker_webserver.sh runs/run_%s/run_%s_input.txt runs/run_%s' %(random_number, random_number, random_number)
+            #command = 'sh run_docker_webserver.sh runs/run_%s/run_%s_input.txt runs/run_%s' %(random_number, random_number, random_number)
+            command = createMotifscopeCommand(random_number)
             print(command)
             command_run = subprocess.Popen(command, shell=True)
         else:
