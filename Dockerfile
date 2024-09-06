@@ -63,5 +63,5 @@ EXPOSE 8004
 # Define the default command to run your application
 # Modify the mofflowind depending on how you run motifscope
 #ENTRYPOINT ["python", "motifscope"]
-#CMD python3 -m flask run --host=82.165.237.220 -p 8004
-ENTRYPOINT ["/bin/bash"]
+CMD python3 -m flask run --host=82.165.237.220 -p 8004
+#ENTRYPOINT ["/bin/bash"]
