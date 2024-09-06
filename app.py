@@ -100,7 +100,7 @@ def download():
 def download_results(run_id):
     # check here the run ID
     filename = f"run_{run_id}.tar.gz"
-    filepath = os.path.join("/runs", filename)
+    filepath = os.path.join("runs", filename)
     return send_file(filepath, as_attachment=True, download_name=filename)
 
 # Run the app
