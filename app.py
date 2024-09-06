@@ -48,14 +48,12 @@ app = Flask(__name__)
 @app.route('/', methods=["GET", "POST"])
 @app.route('/index/', methods=["GET", "POST"])
 def index():
-    # modify the message linked to submission
-    messageSubmission = ''
     # read inputs
     textarea_input = request.form.get('SNPlist', '')
     uploaded_file = request.files.get('fasta_file')
     # parse other inputs here
     # ...
-    if textarea_input != '' and uploaded_file and uploaded_file.filename != '':
+    if (textarea_input != '') or (uploaded_file and uploaded_file.filename != ''):
         # if there was an input of some sort, create random number and output folder
         # generate random number
         random_number = random.randint(0, 1000000)
@@ -78,7 +76,7 @@ def index():
             command = createMotifscopeCommand(random_number)
             command_run = subprocess.Popen(command, shell=True)
     else:
-        messageSubmission = 'Input is missing!'
+        messageSubmission = ''
     return render_template('index.html', messageSubmission=messageSubmission) 
 
 # Download tab
