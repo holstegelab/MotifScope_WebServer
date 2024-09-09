@@ -60,7 +60,7 @@ def index():
         # create output directory
         os.system('mkdir runs/run_%s' %(random_number))
         # message to the user with the run id
-        messageSubmission = 'Your job has been submitted with ID: %s. Check Download page shortly to get your results' %(random_number)
+        messageSubmission = 'Your job has been submitted with ID: %s. Copy your ID, you will need it to access your results.' %(random_number)
         # then check what input that was
         if textarea_input != '':
             # write this file as it is the input for motifscope
