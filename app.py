@@ -23,7 +23,7 @@ def createMotifscopeCommand(random_number, sequence_type, population, min_k, max
     output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
     command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s; echo "process is done"; python3 send_email.py %s %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file, email, random_number)
-    effective_command = 'echo %s > %s' %(command, log_file)
+    effective_command = 'echo "%s" > %s' %(command, log_file)
     effective_command_log = subprocess.Popen(effective_command, shell=True)
     return command
 
