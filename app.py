@@ -39,9 +39,9 @@ def createMotifscopeCommand(random_number, sequence_type, population, min_k, max
         msg['To'] = recipient
         # Send the email
         with smtplib.SMTP('mail.privateemail.com', 465) as server:
-        server.starttls()  # Enable encryption
-        server.login('info@snpxplorer.net', 'snpXplorer22101991!')
-        server.sendmail(sender, recipient, msg.as_string())
+            server.starttls()  # Enable encryption
+            server.login('info@snpxplorer.net', 'snpXplorer22101991!')
+            server.sendmail(sender, recipient, msg.as_string())
     return command
 
 # function to check whether the run_id is correct
