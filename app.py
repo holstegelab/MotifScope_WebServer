@@ -12,13 +12,15 @@ def is_valid_email(email):
     return re.match(pattern, email) is not None
 
 # function to create motifscope command
-def createMotifscopeCommand(random_number):
+def createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided):
     # define input reads
-    input_reads = 'runs/run_%s/run_%s_input.txt' %(random_number, random_number)
+    input_reads = 'runs/run_%s/run_%s_input.fa' %(random_number, random_number)
+    population = 'runs/run_%s/run_%s_population.txt' %(random_number, random_number)
+    ref_motifs = 'runs/run_%s/run_%s_motifs.txt' %(random_number, random_number)
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
     output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type reads -i %s -o %s >> %s' %(input_reads, output_folder, log_file)
+    command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file)
     effective_command = 'echo %s > %s' %(command, log_file)
     save_command_line =  subprocess.Popen(effective_command, shell=True)
     return command
@@ -51,6 +53,29 @@ def index():
     # read inputs
     textarea_input = request.form.get('SNPlist', '')
     uploaded_file = request.files.get('fasta_file')
+    sequence_type = request.form.get('sequence_type', 'reads')  # Default value: reads
+    min_k = request.form.get('min_k', '2')
+    max_k = request.form.get('max_k', '10')
+    figure = request.form.get('figure', 'True')
+    msa = request.form.get('msa', 'Levenshtein')
+    reverse = request.form.get('reverse', 'False')
+    motif_guided = request.form.get('motif_guided', 'False')
+    if sequence_type == "assembly":
+        population_file = request.files.get('tsv_file')
+    else: 
+        population_file = None
+
+    if motif_guided == "True":
+        motif_input_file = request.files.get('motif_input')
+    else: 
+        motif_input_file = None
+
+    if figure == "True":
+        figure_format = request.form.get('format', 'pdf')
+    else: 
+        figure_format = 'pdf'
+
+
     # parse other inputs here
     # ...
     if (textarea_input != '') or (uploaded_file and uploaded_file.filename != ''):
@@ -64,16 +89,30 @@ def index():
         # then check what input that was
         if textarea_input != '':
             # write this file as it is the input for motifscope
-            fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
+            fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
             fout.write(textarea_input)
             fout.close()
         elif uploaded_file and uploaded_file.filename != '':
             input_fasta = uploaded_file.read().decode('utf-8')
-            fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
+            fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
             fout.write(input_fasta)
-            fout.close()    
+            fout.close()
+        if population_file != None:
+            population = population_file.read().decode('utf-8')
+            fout = open('runs/run_%s/run_%s_population.txt' %(random_number, random_number), 'w')
+            fout.write(population)
+            fout.close()
+        else:
+            population = None
+        if motif_input_file != None:
+            ref_motifs = motif_input_file.read().decode('utf-8')
+            fout = open('runs/run_%s/run_%s_motifs.txt' %(random_number, random_number), 'w')
+            fout.write(ref_motifs)
+            fout.close()
+        else:
+            ref_motifs = None
         # run the script here
-        command = createMotifscopeCommand(random_number)
+        command = createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided)
         command_run = subprocess.Popen(command, shell=True)
     else:
         messageSubmission = ''

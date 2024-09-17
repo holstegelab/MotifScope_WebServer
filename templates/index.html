@@ -8,20 +8,23 @@
         </div>
 
         <!-- Title at the top -->
-        <h2>{% block title %} MotifScope {% endblock %}</h2>
+        <div class="centered-container" style="margin-top: 30px";>
+            <img class="centered-image" src="{{ url_for('static', filename='images/motifscope.logo.png') }}" alt="MotifScope Logo" style="max-width: 300px; height: auto;">
+        </div>
+
         <h3>Annotate your tandem repeats in 3 simple steps</h3>
         
         <!-- Subtitle below the title -->
         <div style="display:flex;">
-            <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 32%;">
+            <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 30%;">
                 <h2>1</h2>
                 <h3>Paste your sequences in the text area (FASTA format), or upload your FASTA file.</h3>
             </div>
-            <div style="padding: 10px; background-color: #E0E5F0; margin: 20px; width: 32%;">
+            <div style="padding: 10px; background-color: #E0E5F0; margin: 20px; width: 30%;">
                 <h2>2</h2>
                 <h3>Change MotifScope parameters or leave them as default</h3>
             </div>
-            <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; width: 32%;">
+            <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; width: 30%;">
                 <h2>3</h2>
                 <h3>Add your email so that we can reach you when your results are ready. Then submit!</h3>
             </div>
@@ -29,21 +32,86 @@
         
         <form id="annotationForm" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
             <div style="display:flex;">
-                <!-- Textarea for the input SNPs -->
-                <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 32%;">
+                <!-- Textarea for the input fasta -->
+                <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 30%;">
                     <h4>Paste your sequences</h4>
-                    <textarea name="SNPlist" placeholder="Paste sequences of interest in FASTA format. Please paste up to 100 sequences, otherwise the program will not run.&#10;&#13;&#10;&#13;" rows="5" cols="50" style="font-size: 16px;">{{ request.form.get('SNPlist', '') }}</textarea>
+                    <textarea name="SNPlist" placeholder="Paste sequences of interest in FASTA format. Please paste up to 100 sequences, otherwise the program will not run.&#10;&#13;&#10;&#13;" rows="5" cols="40" style="font-size: 16px;">{{ request.form.get('SNPlist', '') }}</textarea>
                     <h4>Or, upload your FASTA file</h4>
                     <input type="file" name="fasta_file" accept=".fasta,.fa,.FA,.FASTA,.txt" style="margin-top: 10px;">
                 </div> 
         
                 <!-- Next column: parametes -->
-                <div style="padding: 10px; background-color: #E0E5F0; margin: 20px; width: 32%;">
-                    <h4>Motifscope parameters</h4>
+                <div style="padding: 10px; background-color: #E0E5F0; margin: 20px; width: 30%;">
+                    <h4>Motifscope Parameters</h4>
+                    
+                    <!-- First parameter -->
+                    <label for="sequence_type">sequence type:</label>
+                    <select id="sequence_type" name="sequence_type" onchange="toggleTSVInput()">
+                        <option value="reads">reads</option>
+                        <option value="assembly">assembly</option>
+                        <option value="single">single</option>
+                    </select>
+                    <br>
+
+                    <div id="tsv_file_input" style="display:none;">
+                        <label for="tsv_file">upload TSV file containing population information (required):</label>
+                        <input type="file" name="tsv_file" id="tsv_file" accept=".tsv,.txt">
+                    </div>
+
+                    <label for="reverse">use the reverse complement strand:</label>
+                    <select id="reverse" name="reverse">
+                        <option value="False">no</option>
+                        <option value="True">yes</option>
+                    </select>
+                    <br>
+
+                    <label for="min_k">minimum length of motif to characterize:</label>
+                        <input type="number" name="min_k" id="min_k" min="1" value="2" max="32" placeholder="Enter a number">
+                    <br>
+
+                    <label for="max_k">maximum length of motif to characterize:</label>
+                        <input type="number" name="max_k" id="max_k" min="1" value="10" max="32" placeholder="Enter a number">
+                    <br>
+                    
+                    <label for="motif_guided">use known motifs to guide motif discovery:</label>
+                    <select id="motif_guided" name="motif_guided" onchange="toggleTSVInputMotif()">
+                        <option value="False">no</option>
+                        <option value="True">yes</option>
+                    </select>
+                    <br>
+
+                    <div id="motif_input_file" style="display:none;">
+                        <label for="motif_input">upload TSV file containing known motifs (required):</label>
+                        <input type="file" name="motif_input" id="motif_input" accept=".tsv,.txt">
+                    </div>
+
+                    <label for="figure">generate figure:</label>
+                    <select id="figure" name="figure" onchange="toggleFigure()">
+                        <option value="True">yes</option>
+                        <option value="False">no</option>
+                    </select>
+                    <br>
+
+                    <div id="figure_format">
+                        <label for="format">figure format:</label>
+                        <select  name="format" id="format">
+                            <option value="pdf">PDF</option>
+                            <option value="png">PNG</option>
+                        </select>
+                    </div>
+
+                    <label for="msa">multiple sequence alignement:</label>
+                    <select id="msa" name="msa">
+                        <option value="Levenshtein">None</option>
+                        <option value="POANucleotide">on motifs</option>
+                        <option value="POAMotif">on nucleotides</option>
+                    </select>
+                    <br>
+                    
                 </div>
 
                 <!-- Next column: email and submit button -- no login option -->
-                <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; width: 32%;">
+                <div style="padding: 10px; background-color: #EAE7D1; margin: 20px; width: 30%;">
                     <!--<h4>Email</h4>
                     <small>Please enter your email address below. The results will be sent to you:</small>
                     <textarea name="email" style="width: 100%; height: 30px; font-size: 16px;" placeholder="Enter your email here"></textarea>
@@ -58,17 +126,141 @@
 
                 <!-- Javascript to check form was properly completed -->
                 <script>
+                    function validateFASTAHeaders(sequenceType, fastaContent) {
+                        // Split the content into lines
+                        var lines = fastaContent.split("\n");
+                        
+                        // Regular expression for different sequence types
+                        var assemblyRegex = /^>.+#(1|2)#.+$/;  // For "assembly", allow only #1# or #2#
+                        var otherRegex = /^>.+#\d+#.+$/;  // For "reads" or "single", allow any number after #
+
+                        for (var i = 0; i < lines.length; i++) {
+                            var line = lines[i].trim();
+                            // Only check lines that start with '>' (FASTA headers)
+                            if (line.startsWith(">")) {
+                                if (sequenceType === "assembly" && !assemblyRegex.test(line)) {
+                                    return false;  // Invalid assembly header
+                                } else if ((sequenceType === "reads" || sequenceType === "single") && !otherRegex.test(line)) {
+                                    return false;  // Invalid header for other types
+                                }
+                            }
+                        }
+                        return true;  // All headers are valid
+                    }
+
                     function validateForm() {
                         var snpList = document.getElementsByName("SNPlist")[0].value;
                         var fileInput = document.getElementsByName("fasta_file")[0].files;
+                        var min_k = document.getElementById('min_k').value;
+                        var max_k = document.getElementById('max_k').value;
+                        var sequenceType = document.getElementById("sequence_type").value;
+                        var tsvFile = document.getElementById("tsv_file").files;
+                        var motifGuided = document.getElementById("motif_guided").value;
+                        var motifInput = document.getElementById("motif_input").files;
+                        // Convert the values to numbers
+                        min_k = parseInt(min_k);
+                        max_k = parseInt(max_k);
+
                         // Check if either the textarea is not empty or a file is selected
                         if (snpList.trim() === "" && fileInput.length === 0) {
                             alert("Please enter the sequences to annotate or upload a FASTA file.");
                             return false;  // Prevent form submission
                         }
-                        return true;  // Allow form submission
+                        
+                        // Now, proceed to the next check for the FASTA headers (AFTER the original check)
+                        
+                        // Validate pasted sequences in the textarea
+                        if (snpList.trim() !== "") {
+                            if (!validateFASTAHeaders(sequenceType, snpList)) {
+                                alert("Invalid FASTA header format for the selected sequence type. See 'How it works'");
+                                return false;  // Prevent form submission
+                            }
+                        } 
+                        // Validate uploaded file (if a file is uploaded)
+                        else if (fileInput.length > 0) {
+                            var file = fileInput[0];
+                            var reader = new FileReader();
+                            reader.onload = function(event) {
+                                var fastaContent = event.target.result;
+                                if (!validateFASTAHeaders(sequenceType, fastaContent)) {
+                                    alert("Invalid FASTA header format for the selected sequence type. See 'How it works'");
+                                    return false;  // Prevent form submission
+                                }
+                            };
+                            // Synchronous read
+                            reader.readAsText(file);
+                        }
+
+                        // Else, check if max_k is less than min_k
+                        else if (max_k < min_k) {
+                            alert("Error: Maximum length of motif must be greater than or equal to minimum length.");
+                            return false;  // Prevent form submission
+                        }
+                        
+                        // Check if TSV file is required and not uploaded
+                        else if (sequenceType === "assembly" && tsvFile.length === 0) {
+                            alert("Please upload a TSV file containing population information as it is required for 'assembly' sequence mode.");
+                            return false;  // Prevent form submission
+                        }
+
+                        // Check if TSV file is required and not uploaded for motif guided mode
+                        else if (motifGuided === "True" && motifInput.length === 0) {
+                            alert("Please upload a TSV file containing reference motifs as it is required for reference motifs guided mode.");
+                            return false;  // Prevent form submission
+                        }
+
+                        // If all checks pass, allow form submission
+                        return true;
                     }
-                    </script>
+
+                    // Show or hide the TSV file input based on sequence type selection
+                    function toggleTSVInput() {
+                        var sequenceType = document.getElementById('sequence_type').value;
+                        var tsvFileInput = document.getElementById('tsv_file_input');
+                
+                        // If 'assembly' is selected, show the TSV upload input
+                        if (sequenceType === 'assembly') {
+                            tsvFileInput.style.display = 'block';
+                        } else {
+                            // Hide the TSV upload input for other sequence types
+                            tsvFileInput.style.display = 'none';
+                        }
+                    }
+                
+                    // Call the function on page load to ensure correct display of the TSV input
+                    document.addEventListener('DOMContentLoaded', toggleTSVInput);
+
+                    // Show or hide the TSV file input based on sequence type selection
+                    function toggleTSVInputMotif() {
+                        var motifGuided = document.getElementById('motif_guided').value;
+                        var motifInput = document.getElementById('motif_input_file');
+                
+                        // If 'assembly' is selected, show the TSV upload input
+                        if (motifGuided === 'True') {
+                            motifInput.style.display = 'block';
+                        } else {
+                            // Hide the TSV upload input for other sequence types
+                            motifInput.style.display = 'none';
+                        }
+                    }
+
+
+                    function toggleFigure() {
+                        var figureGeneration = document.getElementById('figure').value;
+                        var figureFormat = document.getElementById('figure_format');
+                
+                        // If 'assembly' is selected, show the TSV upload input
+                        if (figureGeneration === 'True') {
+                            figureFormat.style.display = 'block';
+                        } else {
+                            // Hide the TSV upload input for other sequence types
+                            figureFormat.style.display = 'none';
+                        }
+                    }
+                
+                    // Call the function on page load to ensure correct display of the TSV input
+                    document.addEventListener('DOMContentLoaded', toggleTSVInput);
+                </script>               
             </div>
         </form>
 
