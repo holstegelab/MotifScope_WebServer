@@ -4,6 +4,8 @@ import re
 import random
 import os
 import subprocess
+import smtplib
+from email.mime.text import MIMEText
 
 # Functions
 # function to check if an email is valid
@@ -12,7 +14,7 @@ def is_valid_email(email):
     return re.match(pattern, email) is not None
 
 # function to create motifscope command
-def createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided):
+def createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided, email):
     # define input reads
     input_reads = 'runs/run_%s/run_%s_input.fa' %(random_number, random_number)
     population = 'runs/run_%s/run_%s_population.txt' %(random_number, random_number)
@@ -22,7 +24,24 @@ def createMotifscopeCommand(random_number, sequence_type, population, min_k, max
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
     command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file)
     effective_command = 'echo %s > %s' %(command, log_file)
-    save_command_line =  subprocess.Popen(effective_command, shell=True)
+    result =  subprocess.run(effective_command, shell=True)
+    # After the subprocess finishes, send the email
+    if result.returncode == 0:  # Check if the command was successful
+        # Email setup (using smtplib)
+        sender = 'info@snpxplorer.net'
+        recipient = email
+        subject = 'MotifScope Job'
+        body = 'Your subprocess has completed. Your run ID is %s. Go to %s, paste the run ID, and download your results.' %(random_number, 'https://motifscope.holstegelab.eu/download')
+        # Create the email message
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = sender
+        msg['To'] = recipient
+        # Send the email
+        with smtplib.SMTP('mail.privateemail.com', 465) as server:
+        server.starttls()  # Enable encryption
+        server.login('info@snpxplorer.net', 'snpXplorer22101991!')
+        server.sendmail(sender, recipient, msg.as_string())
     return command
 
 # function to check whether the run_id is correct
@@ -51,6 +70,9 @@ app = Flask(__name__)
 @app.route('/index/', methods=["GET", "POST"])
 def index():
     # read inputs
+    email = request.form.get('email', '')
+    email = email.replace(' ', '').rstrip()
+    emailResponse = is_valid_email(email)
     textarea_input = request.form.get('SNPlist', '')
     uploaded_file = request.files.get('fasta_file')
     sequence_type = request.form.get('sequence_type', 'reads')  # Default value: reads
@@ -75,45 +97,47 @@ def index():
     else: 
         figure_format = 'pdf'
 
-
     # parse other inputs here
-    # ...
     if (textarea_input != '') or (uploaded_file and uploaded_file.filename != ''):
-        # if there was an input of some sort, create random number and output folder
-        # generate random number
-        random_number = random.randint(0, 1000000)
-        # create output directory
-        os.system('mkdir runs/run_%s' %(random_number))
-        # message to the user with the run id
-        messageSubmission = 'Your job has been submitted with ID: %s. Copy your ID, you will need it to access your results.' %(random_number)
-        # then check what input that was
-        if textarea_input != '':
-            # write this file as it is the input for motifscope
-            fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
-            fout.write(textarea_input)
-            fout.close()
-        elif uploaded_file and uploaded_file.filename != '':
-            input_fasta = uploaded_file.read().decode('utf-8')
-            fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
-            fout.write(input_fasta)
-            fout.close()
-        if population_file != None:
-            population = population_file.read().decode('utf-8')
-            fout = open('runs/run_%s/run_%s_population.txt' %(random_number, random_number), 'w')
-            fout.write(population)
-            fout.close()
+        emailResponse == True:
+            # if there was an input of some sort, create random number and output folder
+            # generate random number
+            random_number = random.randint(0, 1000000)
+            # create output directory
+            os.system('mkdir runs/run_%s' %(random_number))
+            # message to the user with the run id
+            #messageSubmission = 'Your job has been submitted with ID: %s. Copy your ID, you will need it to access your results.' %(random_number)
+            messageSubmission = 'Your job has been submitted. We will send an email when the results are ready.'
+            # then check what input that was
+            if textarea_input != '':
+                # write this file as it is the input for motifscope
+                fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
+                fout.write(textarea_input)
+                fout.close()
+            elif uploaded_file and uploaded_file.filename != '':
+                input_fasta = uploaded_file.read().decode('utf-8')
+                fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
+                fout.write(input_fasta)
+                fout.close()
+            if population_file != None:
+                population = population_file.read().decode('utf-8')
+                fout = open('runs/run_%s/run_%s_population.txt' %(random_number, random_number), 'w')
+                fout.write(population)
+                fout.close()
+            else:
+                population = None
+            if motif_input_file != None:
+                ref_motifs = motif_input_file.read().decode('utf-8')
+                fout = open('runs/run_%s/run_%s_motifs.txt' %(random_number, random_number), 'w')
+                fout.write(ref_motifs)
+                fout.close()
+            else:
+                ref_motifs = None
+            # run the script here
+            command = createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided, email)
+            #command_run = subprocess.Popen(command, shell=True)
         else:
-            population = None
-        if motif_input_file != None:
-            ref_motifs = motif_input_file.read().decode('utf-8')
-            fout = open('runs/run_%s/run_%s_motifs.txt' %(random_number, random_number), 'w')
-            fout.write(ref_motifs)
-            fout.close()
-        else:
-            ref_motifs = None
-        # run the script here
-        command = createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided)
-        command_run = subprocess.Popen(command, shell=True)
+            messageSubmission = 'Email is not correct. Please check!'
     else:
         messageSubmission = ''
     return render_template('index.html', messageSubmission=messageSubmission) 
