@@ -22,26 +22,9 @@ def createMotifscopeCommand(random_number, sequence_type, population, min_k, max
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
     output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file)
+    command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s; mail -s %s %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file, 'Job completed', email)
     effective_command = 'echo %s > %s' %(command, log_file)
-    result =  subprocess.run(effective_command, shell=True)
-    # After the subprocess finishes, send the email
-    if result.returncode == 0:  # Check if the command was successful
-        # Email setup (using smtplib)
-        sender = 'info@snpxplorer.net'
-        recipient = email
-        subject = 'MotifScope Job'
-        body = 'Your subprocess has completed. Your run ID is %s. Go to %s, paste the run ID, and download your results.' %(random_number, 'https://motifscope.holstegelab.eu/download')
-        # Create the email message
-        msg = MIMEText(body)
-        msg['Subject'] = subject
-        msg['From'] = sender
-        msg['To'] = recipient
-        # Send the email
-        with smtplib.SMTP('mail.privateemail.com', 465) as server:
-            server.starttls()  # Enable encryption
-            server.login('info@snpxplorer.net', 'snpXplorer22101991!')
-            server.sendmail(sender, recipient, msg.as_string())
+    result =  subprocess.Popen(effective_command, shell=True)
     return command
 
 # function to check whether the run_id is correct
