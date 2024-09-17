@@ -99,7 +99,7 @@ def index():
 
     # parse other inputs here
     if (textarea_input != '') or (uploaded_file and uploaded_file.filename != ''):
-        emailResponse == True:
+        if emailResponse == True:
             # if there was an input of some sort, create random number and output folder
             # generate random number
             random_number = random.randint(0, 1000000)
