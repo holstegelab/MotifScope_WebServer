@@ -17,10 +17,13 @@ port, sender, psw, host = config_file[-1].rstrip().split()
 subject = 'Motifscope job'
 body = 'Your job is completed. Your run ID is %s. \n\nGo to https://motifscope.holstegelab.eu/download/, insert your run ID, and download the results.\n\nMotifScope Team' %(random_number)
 msg = MIMEText(body)
+msg['Subject'] = subject
+msg['From'] = sender
+msg['To'] = username
 
 with smtplib.SMTP_SSL(host, port) as server:
-    server.login(username, psw)
-    server.sendmail(sender, recipient, msg.as_string())
+    server.login(sender, psw)
+    server.sendmail(sender, username, msg.as_string())
 
 print('** Email sent successfully!')
 
