@@ -3,7 +3,6 @@ from email.mime.text import MIMEText
 import sys
 
 # read arguments -- username and random number
-print('** Hello!!')
 username = sys.argv[1]
 random_number = sys.argv[2]
 
