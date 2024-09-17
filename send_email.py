@@ -6,8 +6,6 @@ import sys
 print('** Hello!!')
 username = sys.argv[1]
 random_number = sys.argv[2]
-print(username)
-print(random_number)
 
 # read configuration file
 config_file = open('config_email.txt').readlines()
