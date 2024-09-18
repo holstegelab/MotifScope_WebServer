@@ -16,13 +16,14 @@ def is_valid_email(email):
 # function to create motifscope command
 def createMotifscopeCommand(random_number, sequence_type, population, min_k, max_k, figure, figure_format, msa, reverse, motif_guided, email):
     # define input reads
-    input_reads = 'runs/run_%s/run_%s_input.fa' %(random_number, random_number)
-    population = 'runs/run_%s/run_%s_population.txt' %(random_number, random_number)
-    ref_motifs = 'runs/run_%s/run_%s_motifs.txt' %(random_number, random_number)
-    output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
-    output_compressed = 'runs/run_%s.tar.gz' %(random_number)
-    log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
-    command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s; echo "process is done"; python3 send_email.py %s %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file, email, random_number)
+    output_folder = f'runs/run_{random_number}'
+    input_reads = f'{output_folder}/run_{random_number}_input.fa'
+    population = f'{output_folder}/run_{random_number}_population.txt'    
+    ref_motifs = f'{output_folder}/run_{random_number}_motifs.txt'
+    output_prefix = f"{output_folder}/run_{random_number}_output"
+    output_compressed = f'runs/run_{random_number}.zip'
+    log_file = f'{output_folder}/run_{random_number}_output.log'
+    command = f"motifscope --sequence-type {sequence_type} -i {input_reads} -mink {min_k} -maxk {max_k} -o {output_prefix} -p {population} -figure {figure} -format {figure_format} -r 1 -msa {msa} -reverse {reverse} -g {motif_guided} -motif {ref_motifs} >> {log_file}; echo 'process is done'; zip -r {output_compressed} {output_folder}; rm -rf {output_folder}; python3 send_email.py {email} {random_number}"
     effective_command = 'echo "%s" > %s' %(command, log_file)
     effective_command_log = subprocess.Popen(effective_command, shell=True)
     return command
@@ -34,19 +35,27 @@ def check_runID(run_id):
         messageError = True
         messageToUser = 'Please insert a valid Run ID'
     else:
+        try: #validate that run id is an integer
+            run_id = int(run_id)
+            run_id = str(run_id)
+        except:
+            messageError = True
+            messageToUser = 'Not valid Run ID. Try again.'
+            return messageError, messageToUser
+
         # check whether the file exists
-        if os.path.exists('runs/run_%s' %(run_id)):
+        if os.path.exists('runs/run_%s.zip' %(run_id)):
             messageError = False
             messageToUser = 'Valid Run ID. Download will start soon'
             # compress folder and remove original folder
-            os.system('tar -cvf runs/run_%s.tar.gz runs/run_%s && rm -rf runs/run_%s' % (run_id, run_id, run_id))
         else:
             messageError = True
-            messageToUser = 'Not valid Run ID. Try again.'
+            messageToUser = 'Not a valid Run ID, or the results are not ready yet. Try again later.'
     return messageError, messageToUser
 
 # Create a Flask app instance
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024 #max 4 mb
 
 # Annotation section
 @app.route('/', methods=["GET", "POST"])
@@ -90,7 +99,7 @@ def index():
             os.system('mkdir runs/run_%s' %(random_number))
             # message to the user with the run id
             #messageSubmission = 'Your job has been submitted with ID: %s. Copy your ID, you will need it to access your results.' %(random_number)
-            messageSubmission = 'Your job has been submitted. We will send an email when the results are ready.'
+            messageSubmission = f'Your job has been submitted with ID {random_number}. Check the Download page shortly to get your results.\n We will also send an email to notify you when the results are ready.'
             # then check what input that was
             if textarea_input != '':
                 # write this file as it is the input for motifscope
@@ -140,7 +149,7 @@ def download():
 @app.route('/downloadResults/<run_id>', methods=["GET"])
 def download_results(run_id):
     # check here the run ID
-    filename = f"run_{run_id}.tar.gz"
+    filename = f"run_{run_id}.zip"
     filepath = os.path.join("runs", filename)
     return send_file(filepath, as_attachment=True, download_name=filename)
 

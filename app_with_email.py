@@ -18,10 +18,9 @@ def createMotifscopeCommand(random_number, sequence_type, population, min_k, max
     population = 'runs/run_%s/run_%s_population.txt' %(random_number, random_number)
     ref_motifs = 'runs/run_%s/run_%s_motifs.txt' %(random_number, random_number)
     output_folder = 'runs/run_%s/run_%s_output' %(random_number, random_number)
-    output_compressed = 'runs/run_%s.tar.gz' %(random_number)
     log_file = 'runs/run_%s/run_%s_output.log' %(random_number, random_number)
     command = 'motifscope --sequence-type %s -i %s -mink %s -maxk %s -o %s -p %s -figure %s -format %s -r 1 -msa %s -reverse %s -g %s -motif %s >> %s' %(sequence_type, input_reads, str(min_k), str(max_k), output_folder, population, figure, figure_format, msa, reverse, motif_guided, ref_motifs, log_file)
-    effective_command = 'echo %s > %s' %(command, log_file)
+    effective_command = 'echo "%s" > %s' %(command, log_file)
     save_command_line =  subprocess.Popen(effective_command, shell=True)
     return command
 
@@ -32,12 +31,20 @@ def check_runID(run_id):
         messageError = True
         messageToUser = 'Please insert a valid Run ID'
     else:
+        try: #validate that run id is an integer
+            run_id = int(run_id)
+            run_id = str(run_id)
+        except:
+            messageError = True
+            messageToUser = 'Not valid Run ID. Try again.'
+            return messageError, messageToUser
+
         # check whether the file exists
         if os.path.exists('runs/run_%s' %(run_id)):
             messageError = False
             messageToUser = 'Valid Run ID. Download will start soon'
             # compress folder and remove original folder
-            os.system('tar -cvf runs/run_%s.tar.gz runs/run_%s && rm -rf runs/run_%s' % (run_id, run_id, run_id))
+            os.system('zip -r runs/run_%s.zip runs/run_%s && rm -rf runs/run_%s' % (run_id, run_id, run_id))
         else:
             messageError = True
             messageToUser = 'Not valid Run ID. Try again.'
@@ -45,6 +52,7 @@ def check_runID(run_id):
 
 # Create a Flask app instance
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024 #max 4 mb
 
 # Annotation section
 @app.route('/', methods=["GET", "POST"])
@@ -95,12 +103,12 @@ def index():
             # create directory with run information
             if textarea_input != '':
                 # write this file as it is the input for motifscope
-                fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
+                fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
                 fout.write(textarea_input)
                 fout.close()
             elif uploaded_file and uploaded_file.filename != '':
                 input_fasta = uploaded_file.read().decode('utf-8')
-                fout = open('runs/run_%s/run_%s_input.txt' %(random_number, random_number), 'w')
+                fout = open('runs/run_%s/run_%s_input.fa' %(random_number, random_number), 'w')
                 fout.write(input_fasta)
                 fout.close()
             if population_file != None:
@@ -139,7 +147,7 @@ def download():
 @app.route('/downloadResults/<run_id>', methods=["GET"])
 def download_results(run_id):
     # check here the run ID
-    filename = f"run_{run_id}.tar.gz"
+    filename = f"run_{run_id}.zip"
     filepath = os.path.join("runs", filename)
     return send_file(filepath, as_attachment=True, download_name=filename)
 
