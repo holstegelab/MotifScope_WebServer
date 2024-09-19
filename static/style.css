@@ -155,7 +155,7 @@ th {
 .column {
   flex: 1;
   padding: 20px;
-  color: white;
+  color: black;
   text-align: justify; /* Justify alignment */
   min-height: 100px; /* Adjust as needed */
   display: flex;

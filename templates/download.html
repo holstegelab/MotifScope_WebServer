@@ -18,7 +18,9 @@
                     <li>Retrieve the run ID from the email that was sent to you</li>
                     <li>Add your run ID to the search box and type enter</li>
                     <li>If the file is available, a download link will appear. Click on the link to download your results.</li>
-                    <li>If the file is not available, likely it is still running. Please try again in few minutes.</li>
+                    <li>If the file is not available, it is likely still running. Please try again in few minutes.</li>
+                    <li>Download links remain active for 1 month after the run is completed.</li>
+                    <li>If you notice any issues (e.g. missing files, an error in the log file), please contact us by <a href="mailto:y.zhang1@amsterdamumc.nl">mail</a></li>
                 </ul>
             </div>
         </div>
@@ -33,10 +35,18 @@
         
             {% if run_id and not messageError %}
                 <!-- Button to results -->
-                <a href="{{ url_for('download_results', run_id=run_id) }}">Download your annotation results</a>
+                <a href="{{ url_for('download_results', run_id=run_id) }}">Download your full annotation results</a>
+             	{% if figure_exists %}
+					<!-- Button to figure -->
+					<br><br>
+					<a href="{{ url_for('download_figure', run_id=run_id) }}">Show the figure</a>
+				{% else %}
+					<p>A figure was not generated for this run. If this is unexpected, please check the log file in the downloaded results.</p>
+				{% endif %}
                 <br><br>
             {% elif messageToUser %}
-                <p>{{ messageToUser }}</p>
+            	<!-- Error message, make color red -->
+            	<p style="color: red">{{ messageToUser }}</p>
             {% endif %}
         </div>
         

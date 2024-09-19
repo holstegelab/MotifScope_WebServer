@@ -13,17 +13,30 @@
         <!-- Code -->
         <div class="container-main">
             <div class="column" id="column1">
-                <h2>Data and references</h2>
-                <p>MotifScope is a web-server application based on <a href="https://flask.palletsprojects.com/en/2.3.x/"> Flask</a> and written in Python. The source code is freely available on our  <a href="https://github.com/holstegelab/MotifScope">GitHub</a> page.<br>
+                <h2>Documentation</h2>
+                <p>MotifScope is a web-server application based on <a href="https://flask.palletsprojects.com/en/2.3.x/">Flask</a> and written in Python. The source code is freely available on our  <a href="https://github.com/holstegelab/MotifScope">GitHub</a> page.<br>
                 The application can potentially be cloned on your local computer and executed. <br>
-                MotifScope is under active development, please do not hesitate to <a href="mailto:y.zhang1@amsterdamumc.nl">reach us</a> for questions, comments, feedbacks or collaboration opportunities.</p>
-                MotifScope preprint is available <a href="https://www.biorxiv.org/content/10.1101/2024.03.06.583591v1"> here</a>. Go and check it out!
-                <p>Requirement:
+                
+                MotifScope is under active development, please do not hesitate to <a href="mailto:y.zhang1@amsterdamumc.nl">reach out to us</a> for questions, comments, feedbacks or collaboration opportunities.</p>
+                <p>The MotifScope preprint is available <a href="https://www.biorxiv.org/content/10.1101/2024.03.06.583591v1">here</a>. Go and check it out!</p>
+                
+                <p>Instructions:
                     <ul>
-                        <li>For assembly mode, the header of the input sequences should start with >sample_name#hap_number#, for example, for HG002, it should either start with >HG002#1# or >HG002#2#. The population file should be a tab separated file with the first column being the sample names and the second column being the population.</li>
-                        <li>For reads and single read mode, the header of the sequences in input.fa should start with >sample_name#read_number#, for example, >HG002#1#. </li>
-                        <li>To run multiple sequence alignment on the compressed representation of the sequence, select "on motifs" for "multiple sequence alignement" to aligns based on motifs (recommended) or select "on nucleotides" to aligns based on nucleotides.</li>
-                        <li>To run the algorithm with a set of known motifs, select "yes" for "use known motifs to guide motif discovery" and upload the reference motifs in a file that contain the reference motifs separated with tab.</li>
+                    	<li>Please upload a FASTA file containing the sequences to be analyzed. The web server limits the input to 1500 sequences per fasta file, a maximum sequence length of 15kb for each sequence, and a maximum file size of 4MB. If you need to perform larger analyses, please install the local version. </li>
+                    	
+                    	<li>Samples can be annotated with a class label or population label by uploading a TSV file
+                    		<ul>
+								<li>For the tsv file, the first column should contain the sample name and the second column should contain the class label, e.g. HG002\tCEU. </li>
+								<li>If the first line contains fieldnames, the name of the first column needs to be 'sample'. The name of the second column is used for annotation in the figure. When no header is given, the default annotation label is 'population'. </li>
+								<li>For the FASTA file, the header should be in the format >sample_name#hap_number#comment, e.g. >HG002#1#chr1:100-200. </li>	
+							</ul>
+                    	</li>
+                       
+                       	<li>Clustering of reads can be disabled by selecting "no" for "Cluster sequences". This will also remove the dendrogram from the output, which can be useful in case only one or two sequences are analyzed. </li>
+
+                        <li>To run multiple sequence alignment on the compressed representation of the sequence, select "on motifs" for "multiple sequence alignment" to aligns based on motifs or select "on nucleotides" to aligns based on nucleotides.</li>
+
+                        <li>To run the algorithm with a set of known motifs (e.g. in case only a single sample is analyzed), upload the reference motifs in a file that contains the reference motifs separated with tab.</li>
                     </ul>
                 <p>Log history:
                     <ul>
@@ -37,7 +50,6 @@
         <!-- Footnote images -->
         <div class="image-container-foot">
             <img src="{{ url_for('static', filename='images/amstUMC.jpg') }}" alt="ams">
-            <img src="{{ url_for('static', filename='images/tudelft1.png') }}" alt="tud">
             <img src="{{ url_for('static', filename='images/github.png') }}" alt="gith">
         </div>
     </body>
