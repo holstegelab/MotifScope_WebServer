@@ -35,7 +35,7 @@
                 <!-- Textarea for the input fasta -->
                 <div style="padding: 10px; background-color: #9FD8C6; margin: 20px; width: 30%;">
                     <h4>Paste your sequences</h4>
-                    <textarea name="fasta_text" placeholder="Paste sequences of interest in FASTA format. Please paste up to 100 sequences, otherwise the program will not run.&#10;&#13;&#10;&#13;" rows="5" cols="40" style="font-size: 16px;">{{ request.form.get('fasta_text', '') }}</textarea>
+                    <textarea name="fasta_text" placeholder="Paste sequences of interest in FASTA format. Please paste up to 1500 sequences, otherwise the program will not run.&#10;&#13;&#10;&#13;" rows="5" cols="40" style="font-size: 16px;">{{ request.form.get('fasta_text', '') }}</textarea>
                     <h4>Or, upload your FASTA file</h4>
                     <input type="file" name="fasta_file" accept=".fasta,.fa,.FA,.FASTA,.txt" style="margin-top: 10px;">
                     <p>Example FASTA file: <a href="{{ url_for('static', filename='example.fa') }}" download>example.fa</a></p>
@@ -61,7 +61,7 @@
                     </select>
                     <br>
 
-                    <label for="class_file">Upload TSV file containing sample class information (optional, <a href="{{ url_for('static', filename='example.tsv') }}" download>example.tsv</a>):</label>
+                    <label for="class_file">Upload TSV file containing sample class information (optional, <a href="{{ url_for('static', filename='example.sample.tsv') }}" download>example.sample.tsv</a>):</label>
                     <input type="file" name="class_file" id="class_file" accept=".tsv,.txt">
                     <br>
 
@@ -74,7 +74,7 @@
                         <input type="number" name="max_k" id="max_k" min="1" value="10" max="32" placeholder="Enter a number">
                     <br>
                     
-					<label for="motif_input">Upload file containing tab-separated known motifs (optional):</label>
+					<label for="motif_input">Upload file containing tab-separated known motifs (optional, <a href="{{ url_for('static', filename='example.motifs.tsv') }}" download>example.motifs.tsv</a>):</label>
 					<input type="file" name="motif_input" id="motif_input" accept=".tsv,.txt">
 	               
 	               	<br>

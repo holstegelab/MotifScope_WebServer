@@ -15,7 +15,7 @@ else:
     port, sender, psw, host = config_file[-1].rstrip().split()
 
     # Email details
-    subject = 'Motifscope job'
+    subject = 'MotifScope job'
     sender_name = f"MotifScope <{sender}>"
     body = 'Your job is completed. Your run ID is %s. \n\nGo to https://motifscope.holstegelab.eu/download/, insert your run ID, and download the results.\n\nMotifScope Team' %(random_number)
     msg = MIMEText(body)
