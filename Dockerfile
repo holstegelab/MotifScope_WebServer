@@ -18,6 +18,7 @@ RUN apt-get update && \
         git \
         zlib1g-dev \
         libpng-dev \
+        zip \
         && \
         pip install --no-cache-dir -r requirements.txt && \
         rm -rf /var/lib/apt/lists/*
