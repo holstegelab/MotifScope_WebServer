@@ -165,7 +165,6 @@ def figure_exist(run_id):
         filepath = os.path.join("runs", filename)
     return os.path.exists(filepath)
 
-
 # Download tab
 @app.route('/download/', methods=["GET", "POST"])
 def download():
